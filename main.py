@@ -1,20 +1,24 @@
-from utils.task_data import load_tasks,create_task,save_tasks,complete_task,update_task,delete_task,format_time,get_current_progress,get_task_status
+from utils.task_data import load_tasks,create_task,save_tasks,complete_task,update_task,delete_task,format_time,get_current_progress,get_task_status,get_overdue_status
 from datetime import date
 
 tasks = load_tasks("data/tasks.json")
 
 while True:
     print("===========DailyPlan===========")
+    print(date.today())
+    print()
     print("今日任务：")
+    print("-------------------------------")
 
     for task_id, task in tasks.items():
         count = get_current_progress(task)
         status = get_task_status(task)
 
         if status == "active":
-            print(f"{task_id}: {task['name']} - {task['cycle']} - {count}/{task['target']}{task['unit']}")
+            print(f"[ ] {task['name']:<20} {task['cycle']:<8} {count}/{task['target']}{task['unit']}")
 
-    print("\n已完成任务：")
+    print("\n已完成")
+    print("--------------------------------")
 
     for task_id, task in tasks.items():
         status = get_task_status(task)
@@ -23,12 +27,16 @@ while True:
             print(task["name"])
 
     print("\n逾期任务：")
+    print("--------------------------------")
 
     for task_id, task in tasks.items():
         status = get_task_status(task)
+        count = get_current_progress(task)
 
         if status == "overdue":
-            print(task["name"])
+            print(f"{task['name']:<20} {task['cycle']:<8} {count}/{task['target']}{task['unit']}")
+            if get_overdue_status(task):
+                save_tasks(tasks,"data/tasks.json")
 
     print("1. 完成任务")
     print("2. 查看任务详情")

@@ -69,6 +69,7 @@ def delete_task(tasks, task_id):
             new_id += 1
         tasks.clear()
         tasks.update(new_tasks)
+        print("删除成功！")
 
         return True
     else:
@@ -89,14 +90,22 @@ def update_task(tasks, task_id, updated_task):
 def complete_task(tasks,task_id):
  
     if task_id in tasks:
+        task = tasks[task_id]
         today = str(date.today())
-        if today in tasks[task_id]["completion_history"]:
-            print("今日已经完成过了!")
-            return False
-        else:
-            tasks[task_id]["completion_history"].append(today)
-            print("恭喜你，今日打卡成功!")
+        status = get_task_status(task)
+
+        if status == "active":
+            task["completion_history"].append(today)
+            print("恭喜你，成功打卡")
             return True
+        elif status == "overdue":
+            task["overdue_completion_history"].append(today)
+            print("下次一定要按时完成呦~")
+            return True
+        elif status == "completed":
+            print("这项任务已经完成了，无需再次操作。")
+            return False
+
     else:
         print("任务不存在，请检查后重新输入！")
         return False
@@ -163,7 +172,7 @@ def get_overdue_status(task):
         if overdue["date"] == today:
             return False
         
-    reason = input("请输入本次逾期原因：")
+    reason = input(f"请输入{task['name']}本次逾期原因：")
     
     task["overdue_history"].append({
         "date":today,
@@ -182,10 +191,11 @@ def get_task_status(task):
     target = task["target"]
 
     if count >= target:
-
         return "completed"
+    
     elif today > end_date:
         return "overdue"
+    
     else:
         return "active"
 
